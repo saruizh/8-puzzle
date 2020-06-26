@@ -16,133 +16,59 @@ import java.util.Stack;
 public class Puzzle {
     
     public static void movD(int i, int j, int A[][]){
-        //cambio A[i][j] por A[i][j+1]
         int l=A[i][j];
         A[i][j]=A[i][j+1];
-        A[i][j+1]=l;
-        
+        A[i][j+1]=l; 
     }
     public static void movI(int i, int j, int A[][]){
-        //cambio A[i][j] por A[i][j-1]
         int l=A[i][j];
         A[i][j]=A[i][j-1];
         A[i][j-1]=l;
         
     }
     public static void movA(int i, int j, int A[][]){
-        //cambio A[i][j] por A[i-1][j]
         int l=A[i][j];
         A[i][j]=A[i-1][j];
         A[i-1][j]=l;
-        
     }
     public static void movAb(int i, int j, int A[][]){
-        //cambio A[i][j] por A[i+1][j]
         int l=A[i][j];
         A[i][j]=A[i+1][j];
         A[i+1][j]=l;        
-    }  
-    
+    }
     public static int aleatorio(int dimension){
         Random r = new Random();
         return r.nextInt(dimension)+1;
     }
-    public static void clonar(int A[][],int comparacion[][]){
-        
-        for(int a=0;a<3;a++){
-                for(int b=0;b<3;b++){
-                    comparacion[a][b]=A[a][b];         
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public static Stack BPL(int nodo[][], int objetivo[][], int profundidad, int i, int j, boolean arriba,boolean abajo,boolean derecha,boolean izquierda,Stack pila){ 
+        int aux[][]={{0,0,0},{0,0,0},{0,0,0}};
+        if(profundidad==0 && Arrays.equals(nodo,objetivo)){
+            for(int p=0;p<3;p++){
+                System.out.print("\n");
+                for(int l=0;l<3;l++){
+                    System.out.print(nodo[p][l]);
                 }
             }
-    }
-    public static boolean comparar(int A[][],int B[][]){
-        boolean compara;
-        int k=0;
-        for(int i=0;i<3;i++){
-            for(int j=0;j<3;j++){
-                if(A[i][j]==B[i][j]){
-                    k++;
-                }
-            }
-        }
-        if(k==9){
-            compara=false;
-            return compara;
-        }
-        else{
-            compara=true;
-            return compara;
-        }
-    }
-    public static int menordetres(int h1,int h2,int h3){
-        int menor=h1;
-        if(h1>h2){
-            menor=h2;
-            if(h2>h3){
-                menor=h3;
-            }
-        }
-        else{
-            if(h1>h3){
-                menor=h3;
-            }
-        }
-        return menor;
-    }
-    public static int menordecuatro(int h1, int h2, int h3, int h4){
-        int []A={h1,h2,h3,h4};
-        int menor=A[0];
-        for(int i = 0; i < A.length; i++)
+            return pila;
+        }    
+        else if(profundidad>0)
         {
-            if(menor>A[i])
-            {
-                    menor=A[i];
-            }
-        }
-        return menor;
-    }
-    
-        
-    public static int h(int comparacion[][], int original[][]){
-        int h=0;
-            for(int a=0;a<3;a++){
-                for(int b=0;b<3;b++){
-                    if(comparacion[a][b]!=original[a][b]){
-                        if(comparacion[a][b]==1){
-                            h+=a+b;
-                        }
-                        else if(comparacion[a][b]==2){
-                            h+=a+Math.abs(b-1); 
-                        }
-                        else if(comparacion[a][b]==3){
-                            h+=Math.abs(a-0)+Math.abs(b-2);
-                        }
-                        else if(comparacion[a][b]==4){
-                            h+=Math.abs(a-1)+Math.abs(b-0);
-                        }
-                        else if(comparacion[a][b]==5){
-                            h+=Math.abs(a-1)+Math.abs(b-1);
-                        }
-                        else if(comparacion[a][b]==6){
-                            h+=Math.abs(a-1)+Math.abs(b-2);
-                        }
-                        else if(comparacion[a][b]==7){
-                            h+=Math.abs(a-2)+Math.abs(b-0);
-                        }
-                        else if(comparacion[a][b]==8){
-                            h+=Math.abs(a-2)+Math.abs(b-1);
-                        } 
-                    }  
+            for(int p=0;p<3;p++){
+                System.out.print("\n");
+                for(int l=0;l<3;l++){
+                    System.out.print(nodo[p][l]);
                 }
             }
-        return h;
-    }
-    
-    public static int[][] BPL(int nodo[][], int objetivo[][], int profundidad, int i, int j, boolean arriba,boolean abajo,boolean derecha,boolean izquierda,Stack pila){ 
-        if(profundidad >= 0){
-            if(nodo == objetivo){
-                return nodo;
-            }
+            System.out.print("\n");
             //expando al padre y para cada hijo calculo BPL
             if(i==0 && j==0){
                 if(arriba==true){
@@ -169,7 +95,17 @@ public class Puzzle {
                     j=j+1;
                     derecha=true;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -179,7 +115,6 @@ public class Puzzle {
                     abajo=true;
                     pila.push(nodo);
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-
                 }
             }
             else if(i==0 && j==1){
@@ -188,7 +123,17 @@ public class Puzzle {
                     movD(i,j,nodo);
                     j=j+1;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     movAb(i,j,nodo);
@@ -203,7 +148,17 @@ public class Puzzle {
                     movI(i,j,nodo);
                     j=j-1;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                     movD(i,j,nodo);
                     j=j+1;
                     movAb(i,j,nodo);
@@ -220,7 +175,17 @@ public class Puzzle {
                     derecha=true;
                     arriba=false;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -237,7 +202,17 @@ public class Puzzle {
                     j=j+1;
                     derecha=true;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -245,7 +220,17 @@ public class Puzzle {
                     i=i+1;
                     abajo=true;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                     movA(i,j,nodo);
                     i=i-1;
                     abajo=false;
@@ -277,12 +262,23 @@ public class Puzzle {
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
                 }
                 else{
+                    
                     profundidad=profundidad-1;
                     movI(i,j,nodo);
                     j=j-1;
                     izquierda=true;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                     movD(i,j,nodo);
                     j=j+1;
                     izquierda=false;
@@ -299,7 +295,17 @@ public class Puzzle {
                         movA(i,j,nodo);
                         i=i-1;
                         pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
+                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                         movAb(i,j,nodo);
                         i=i+1;
                         movD(i,j,nodo);
@@ -316,7 +322,17 @@ public class Puzzle {
                         arriba=true;
                         izquierda=false;
                         pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
+                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                         movAb(i,j,nodo);
                         i=i+1;
                         arriba=false;
@@ -329,7 +345,17 @@ public class Puzzle {
                         movAb(i,j,nodo);
                         i=i+1;
                         pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
+                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                         movA(i,j,nodo);
                         i=i-1;
                         movD(i,j,nodo);
@@ -337,7 +363,7 @@ public class Puzzle {
                         abajo=false;
                         derecha=true;
                         pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);  
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila); 
                     }
                     else{
                         profundidad=profundidad-1;
@@ -345,7 +371,17 @@ public class Puzzle {
                         i=i-1;
                         arriba=true;
                         pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
+                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
                         movAb(i,j,nodo);
                         i=i+1;
                         arriba=false;
@@ -353,7 +389,17 @@ public class Puzzle {
                         movAb(i,j,nodo);
                         i=i+1;
                         pila.push(nodo);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
                         BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                        }
                         movA(i,j,nodo);
                         i=i-1;
                         abajo=false;
@@ -368,7 +414,17 @@ public class Puzzle {
                     movA(i,j,nodo);
                     i=i-1;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movAb(i,j,nodo);
                     i=i+1;
                     movD(i,j,nodo);
@@ -376,7 +432,17 @@ public class Puzzle {
                     arriba=false;
                     derecha=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -389,7 +455,17 @@ public class Puzzle {
                     movAb(i,j,nodo);
                     i=i+1;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movA(i,j,nodo);
                     i=i-1;
                     movD(i,j,nodo);
@@ -397,7 +473,17 @@ public class Puzzle {
                     abajo=false;
                     derecha=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -412,7 +498,17 @@ public class Puzzle {
                     movD(i,j,nodo);
                     j=j+1;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     movAb(i,j,nodo);
@@ -420,7 +516,17 @@ public class Puzzle {
                     derecha=false;
                     abajo=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movA(i,j,nodo);
                     i=i-1;
                     abajo=false;
@@ -435,7 +541,17 @@ public class Puzzle {
                     movI(i,j,nodo);
                     j=j-1;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movD(i,j,nodo);
                     j=j+1;
                     movA(i,j,nodo);
@@ -443,7 +559,17 @@ public class Puzzle {
                     izquierda=false;
                     arriba=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movAb(i,j,nodo);
                     i=i+1;
                     arriba=false;
@@ -459,7 +585,17 @@ public class Puzzle {
                     i=i-1;
                     arriba=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movAb(i,j,nodo);
                     i=i+1;
                     arriba=false;
@@ -467,7 +603,17 @@ public class Puzzle {
                     i=i+1;
                     abajo=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movA(i,j,nodo);
                     i=i-1;
                     abajo=false;
@@ -475,7 +621,17 @@ public class Puzzle {
                     j=j+1;
                     derecha=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -492,7 +648,17 @@ public class Puzzle {
                     movA(i,j,nodo);
                     i=i-1;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movAb(i,j,nodo);
                     i=i+1;
                     arriba=false;
@@ -509,7 +675,17 @@ public class Puzzle {
                     derecha=false;
                     abajo=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movA(i,j,nodo);
                     i=i-1;
                     abajo=false;
@@ -524,7 +700,18 @@ public class Puzzle {
                     movAb(i,j,nodo);
                     i=i+1;
                     pila.push(nodo);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                        }
+                    }
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                        for(int t=0;t<3;t++){
+                            nodo[h][t]=aux[h][t];
+                        }
+                    }
+                    
                     movA(i,j,nodo);
                     i=i-1;
                     movI(i,j,nodo);
@@ -536,22 +723,42 @@ public class Puzzle {
                 }
                 else{
                     profundidad=profundidad-1;
-                    abajo=true;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    movA(i,j,nodo);
-                    i=i-1;
-                    abajo=false;
                     movA(i,j,nodo);
                     i=i-1;
                     arriba=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movAb(i,j,nodo);
                     i=i+1;
                     arriba=false;
+                    abajo=true;
+                    movAb(i,j,nodo);
+                    i=i+1;
+                    pila.push(nodo);                    
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
+                    movA(i,j,nodo);
+                    i=i-1;
+                    abajo=false;
                     movI(i,j,nodo);
                     j=j-1;
                     izquierda=true;
@@ -584,7 +791,17 @@ public class Puzzle {
                     i=i-1;
                     arriba=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movAb(i,j,nodo);
                     i=i+1;
                     arriba=false;
@@ -603,7 +820,17 @@ public class Puzzle {
                     abajo=false;
                     izquierda=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movD(i,j,nodo);
                     j=j+1;
                     movD(i,j,nodo);
@@ -618,7 +845,17 @@ public class Puzzle {
                     movD(i,j,nodo);
                     j=j+1;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -628,12 +865,22 @@ public class Puzzle {
                     pila.push(nodo);
                     BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
                 }
-                else if(izquierda=true){
+                else if(izquierda==true){
                     profundidad=profundidad-1;
                     movI(i,j,nodo);
                     j=j-1;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movD(i,j,nodo);
                     j=j+1;
                     movA(i,j,nodo);
@@ -649,7 +896,17 @@ public class Puzzle {
                     j=j-1;
                     izquierda=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movD(i,j,nodo);
                     j=j+1;
                     izquierda=false;
@@ -657,7 +914,17 @@ public class Puzzle {
                     j=j+1;
                     derecha=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movI(i,j,nodo);
                     j=j-1;
                     derecha=false;
@@ -693,7 +960,17 @@ public class Puzzle {
                     i=i-1;
                     arriba=true;
                     pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                    for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                            aux[h][t]=nodo[h][t];
+                            }
+                        }
+                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+                        for(int h=0;h<3;h++){
+                            for(int t=0;t<3;t++){
+                                nodo[h][t]=aux[h][t];
+                            }
+                    }
                     movAb(i,j,nodo);
                     i=i+1;
                     arriba=false;
@@ -705,7 +982,17 @@ public class Puzzle {
                 }  
             }
         }
-        return nodo;
+        else if(profundidad==0){
+            for(int p=0;p<3;p++){
+                System.out.print("\n");
+                for(int l=0;l<3;l++){
+                    System.out.print(nodo[p][l]);
+                }
+            }
+            System.out.print("\n");
+            return null;
+        }
+        return null;
     }
         
     public static void main(String[] args) {
@@ -713,15 +1000,11 @@ public class Puzzle {
         int [][] A = {{1,2,3},{4,5,6},{7,8,0}};
         int i=2;
         int j=2;
-        
         boolean arriba=false;
         boolean abajo=false;
         boolean derecha=false;
-        boolean izquierda=false;
-        //boolean ref=false;
-        
+        boolean izquierda=false;        
         //hago el desorden con 14 movimientos
-        
         for(int cont=0;cont<2;cont++){
             //mover(i,j,arriba,abajo,derecha,izquierda,A);
             if(i==0 && j==0){
@@ -738,7 +1021,6 @@ public class Puzzle {
                     abajo=true;
                 }
             }
-            
             else if(i==0 && j==1){
                 if(derecha==true){
                     int alea=aleatorio(2);
@@ -1086,15 +1368,16 @@ public class Puzzle {
         
         ///se hace búsqueda de profundidad limitada
         
+        
+        
+        
+        
+        
+        System.out.print("se hace el arbol");
         // se hace una pila en donde se guardan los nodos del arbol:
         // A 
         Stack pila = new Stack();
         pila.push(A);
-        /*while(!pila.isEmpty()){
-            System.out.println(pila.peek().toString());
-            pila.pop();
-            //pila.peek().toString();
-        }*/    
         
         int [][] objetivo = {{1,2,3},{4,5,6},{7,8,0}};
         int profundidad=2;
@@ -1110,20 +1393,12 @@ public class Puzzle {
                 }
             }
         }
+        Stack pila2=BPL(A,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
         
-        int [][] nod=BPL(A,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-        for(int k=0;k<3;k++){
-            System.out.print("\n");
-            for(int l=0;l<3;l++){
-                System.out.println(nod[k][l]);
-            }
-        }
         
-            
-        while(!pila.isEmpty()){
-            System.out.println(pila.peek());
-            pila.pop();
-        }
+        
+        
+        
     }
     
 }
