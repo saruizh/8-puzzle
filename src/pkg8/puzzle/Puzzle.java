@@ -5,12 +5,11 @@
  */
 package pkg8.puzzle;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Stack;
 
@@ -25,1047 +24,101 @@ public class Puzzle {
         int contador=0;
         for(int i=0;i<3;i++){
             for(int j=0;j<3;j++){
-                if(nodo[i][j]!=cont && (i+j<4)){
+                if(nodo[i][j]!=cont){
                     contador++;
                 }
                 cont++;
             }
         }
-        return contador;
+        return contador-1;
     }
     
-    public static void movD(int i, int j, int A[][]){
+    public static int[][] movD(int i, int j, int A[][]){
         int l=A[i][j];
         A[i][j]=A[i][j+1];
-        A[i][j+1]=l; 
+        A[i][j+1]=l;
+        return A;
     }
-    public static void movI(int i, int j, int A[][]){
-        int l=A[i][j];
-        A[i][j]=A[i][j-1];
-        A[i][j-1]=l;
-        
+    public static int[][] movI(int i, int j, int A[][]){
+        int aux[][]=A;
+        int l=aux[i][j];
+        aux[i][j]=aux[i][j-1];
+        aux[i][j-1]=l;
+        return aux;        
     }
-    public static void movA(int i, int j, int A[][]){
+    public static int[][] movA(int i, int j, int A[][]){
         int l=A[i][j];
         A[i][j]=A[i-1][j];
         A[i-1][j]=l;
+        return A;
     }
-    public static void movAb(int i, int j, int A[][]){
+    public static int[][] movAb(int i, int j, int A[][]){
         int l=A[i][j];
         A[i][j]=A[i+1][j];
-        A[i+1][j]=l;        
+        A[i+1][j]=l;
+        return A;
     }
     public static int aleatorio(int dimension){
         Random r = new Random();
         return r.nextInt(dimension)+1;
     }
-    public static void agregar_nodo(int [][] nodo,ArrayList directorio){
-        for(int m=0;m<3;m++){
-            for(int n=0;n<3;n++){
-                directorio.add(nodo[m][n]);
-            }
-        }
-    }
-    public static int indice_minimo(List<Integer> F, List<Boolean> despliega, int f_min){
-        int indice=0;
-        int cont=F.size();
-        for(int i=0;i<F.size();i++){
-            if(despliega.get(i)==false && F.get(i)<=f_min){
-                indice=i;
-                cont--;
-            }
-        }
-        if(cont==F.size()){
-            return F.size()-1;
-        }
-        else{
-            return indice;
-        }
-    }
-    public static int [][] nodo_apuntador(int index,ArrayList<Integer> arbol,int[][] nodo){
-        int k=0;
-        for(int u=index;u<index+9;u++){
-            int j=k%3;
-            int i=k/3;          
-            nodo[i][j]=arbol.get(u);
-            k++;
-        }
-        return nodo;
-    }
     
-    public static void a_estrella(int nodo[][],int objetivo[][],ArrayList<Integer> arbol,int f, int i, int j){
-        List<Integer> G= new ArrayList<Integer>();
-        List<Integer> F= new ArrayList<Integer>();
-        List<Boolean> despliega = new ArrayList<>(Collections.nCopies(1, false)); // 0 porque se despliega mas abajo
-        int g=0;
-        int indice=0;//indice para f
-        int index=0; //indice para el arbol
-        F.add(f);
-        G.add(g);
+    public static class nodo{
+        boolean derecha;
+        boolean izquierda;
+        boolean arriba;
+        boolean abajo;
+        boolean despliegue;
+        int g;
         int h;
-        int f_min=f;
-        boolean arriba=false;
-        boolean abajo=false;
-        boolean derecha=false;
-        boolean izquierda=false;
-        while(!Arrays.equals(nodo,objetivo)){
-            if(i==0 && j==0){
-                if(arriba==true){
-                    movD(i,j,nodo);
-                    j=j+1;
-                    derecha=true;
-                    arriba=false;
-                    /////////ctrl+c and ctrl+v
-                    despliega.set(indice,true);//si se despliegan los hijos aviso que si y cambia a verdadero
-                    agregar_nodo(nodo,arbol); //agrego nodo a la lista
-                    despliega.add(false);// agrego falso para el nodo actual
-                    h=o_h(nodo);//calculo h
-                    G.add(G.get(indice)+1); //agrego a lista de profundidades
-                    f=g+h;//calculo f
-                    F.add(f);
-                    ///////////////////////////esta parte se hace para cada uno
-                    //se halla el minimo f de los nodos hijos
-                    //cuando calculo f me toca ver una lista de todos los f y encontrar si es menor o igual                    
-                    if(f>f_min){
-                        //busco nodo en la lista para actualizarlo
-                        indice=indice_minimo(F,despliega,f_min); //busca el indice donde el nodo es menor
-                        f_min=F.get(indice); // encuentra el F minimo
-                        index=(indice*9);
-                        nodo=nodo_apuntador(index,arbol,nodo);
-                    }
-                    else if(f<=f_min){
-                        f_min=f;
-                    }
-                }
-                else if(izquierda==true){
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    izquierda=false;
-                    abajo=true;
-                    
-                    despliega.set(indice,true);//si se despliegan los hijos aviso que si y cambia a verdadero
-                    agregar_nodo(nodo,arbol); //agrego nodo a la lista
-                    despliega.add(false);// agrego falso para el nodo actual
-                    h=o_h(nodo);//calculo h
-                    G.add(G.get(indice)+1); //agrego a lista de profundidades
-                    f=g+h;//calculo f
-                    F.add(f);
-                    ///////////////////////////esta parte se hace para cada uno
-                    //se halla el minimo f de los nodos hijos
-                    //cuando calculo f me toca ver una lista de todos los f y encontrar si es menor o igual                    
-                    if(f>f_min){
-                        //busco nodo en la lista para actualizarlo
-                        indice=indice_minimo(F,despliega,f_min); //busca el indice donde el nodo es menor
-                        f_min=F.get(indice); // encuentra el F minimo
-                        index=(indice*9);
-                        nodo=nodo_apuntador(index,arbol,nodo);
-                    }
-                    else if(f<=f_min){
-                        f_min=f;
-                    }
-                }
-                else{
-                    profundidad=profundidad-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    derecha=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    izquierda=false;
-                    abajo=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-            }
-            else if(i==0 && j==1){
-                if(derecha==true){
-                    profundidad=profundidad-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    abajo=true;
-                    derecha=false;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(izquierda==true){
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    movD(i,j,nodo);
-                    j=j+1;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    izquierda=false;
-                    abajo=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(arriba==true){
-                    profundidad=profundidad-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    derecha=true;
-                    arriba=false;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    arriba=false;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else{
-                    profundidad=profundidad-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    derecha=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    abajo=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    movA(i,j,nodo);
-                    i=i-1;
-                    abajo=false;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-            }
-            else if(i==0 && j==2){
-                if(arriba==true){
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    arriba=false;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    
-                }
-                else if(derecha==true){
-                    profundidad=profundidad-1;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    abajo=true;
-                    derecha=false;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else{
-                    
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    movD(i,j,nodo);
-                    j=j+1;
-                    izquierda=false;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    abajo=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-            }
-            else if(i==1 && j==0){
-                    if(arriba==true){
-                        profundidad=profundidad-1;
-                        movA(i,j,nodo);
-                        i=i-1;
-                        pila.push(nodo);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                        }
-                        movAb(i,j,nodo);
-                        i=i+1;
-                        movD(i,j,nodo);
-                        j=j+1;
-                        derecha=true;
-                        arriba=false;
-                        pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    }
-                    else if(izquierda==true){
-                        profundidad=profundidad-1;
-                        movA(i,j,nodo);
-                        i=i-1;
-                        arriba=true;
-                        izquierda=false;
-                        pila.push(nodo);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                        }
-                        movAb(i,j,nodo);
-                        i=i+1;
-                        movAb(i,j,nodo);
-                        i=i+1;
-                        arriba=false;
-                        abajo=true;
-                        pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    }
-                    else if(abajo==true){
-                        profundidad=profundidad-1;
-                        movAb(i,j,nodo);
-                        i=i+1;
-                        pila.push(nodo);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                        }
-                        movA(i,j,nodo);
-                        i=i-1;
-                        movD(i,j,nodo);
-                        j=j+1;
-                        abajo=false;
-                        derecha=true;
-                        pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila); 
-                    }
-                    else{
-                        profundidad=profundidad-1;
-                        movA(i,j,nodo);
-                        i=i-1;
-                        arriba=true;
-                        pila.push(nodo);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                        }
-                        movAb(i,j,nodo);
-                        i=i+1;
-                        arriba=false;
-                        abajo=true;
-                        movAb(i,j,nodo);
-                        i=i+1;
-                        pila.push(nodo);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                        }
-                        movA(i,j,nodo);
-                        i=i-1;
-                        movD(i,j,nodo);
-                        j=j+1;
-                        abajo=false;
-                        derecha=true;
-                        pila.push(nodo);
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    }
-            }
-            else if(i==1 && j==1){
-                if(arriba==true){
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    arriba=false;
-                    derecha=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(abajo==true){
-                    profundidad=profundidad-1;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movA(i,j,nodo);
-                    i=i-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    abajo=false;
-                    derecha=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(derecha==true){
-                    profundidad=profundidad-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    derecha=false;
-                    abajo=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movA(i,j,nodo);
-                    i=i-1;
-                    abajo=false;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    arriba=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(izquierda==true){
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movD(i,j,nodo);
-                    j=j+1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    izquierda=false;
-                    arriba=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    arriba=false;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    abajo=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else{
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    arriba=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    arriba=false;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    abajo=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movA(i,j,nodo);
-                    i=i-1;
-                    abajo=false;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    derecha=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-            }
-            else if(i==1 && j==2){
-                if(arriba==true){
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    arriba=false;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(derecha==true){
-                    profundidad=profundidad-1;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    derecha=false;
-                    abajo=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movA(i,j,nodo);
-                    i=i-1;
-                    abajo=false;
-                    movA(i,j,nodo);
-                    arriba=true;
-                    i=i-1;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(abajo==true){
-                    profundidad=profundidad-1;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                        }
-                    }
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                    for(int h=0;h<3;h++){
-                        for(int t=0;t<3;t++){
-                            nodo[h][t]=aux[h][t];
-                        }
-                    }
-                    
-                    movA(i,j,nodo);
-                    i=i-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    abajo=false;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else{
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    arriba=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    arriba=false;
-                    abajo=true;
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    pila.push(nodo);                    
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movA(i,j,nodo);
-                    i=i-1;
-                    abajo=false;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-            }
-            else if(i==2 && j==0){
-                if(izquierda==true){
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    izquierda=false;
-                    arriba=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(abajo==true){
-                    profundidad=profundidad-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    abajo=false;
-                    derecha=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else{
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    arriba=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    arriba=false;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    derecha=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-            }
-            else if(i==2 && j==1){
-                if(abajo==true){
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    abajo=false;
-                    izquierda=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movD(i,j,nodo);
-                    j=j+1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    izquierda=false;
-                    derecha=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(derecha==true){
-                    profundidad=profundidad-1;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    arriba=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(izquierda==true){
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movD(i,j,nodo);
-                    j=j+1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    izquierda=false;
-                    arriba=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else{
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movD(i,j,nodo);
-                    j=j+1;
-                    izquierda=false;
-                    movD(i,j,nodo);
-                    j=j+1;
-                    derecha=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movI(i,j,nodo);
-                    j=j-1;
-                    derecha=false;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    arriba=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-            }
-            else if(i==2 && j==2){
-                if(abajo==true){
-                    profundidad=profundidad-1;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    abajo=false;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else if(derecha==true){
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    derecha=false;
-                    arriba=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }
-                else{
-                    profundidad=profundidad-1;
-                    movA(i,j,nodo);
-                    i=i-1;
-                    arriba=true;
-                    pila.push(nodo);
-                    for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                            aux[h][t]=nodo[h][t];
-                            }
-                        }
-                        BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                        for(int h=0;h<3;h++){
-                            for(int t=0;t<3;t++){
-                                nodo[h][t]=aux[h][t];
-                            }
-                    }
-                    movAb(i,j,nodo);
-                    i=i+1;
-                    arriba=false;
-                    movI(i,j,nodo);
-                    j=j-1;
-                    izquierda=true;
-                    pila.push(nodo);
-                    BPL(nodo,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
-                }  
-            }
+        int f;
+        public nodo(boolean derecha,boolean izquierda,boolean arriba,boolean abajo, boolean despliegue,int g,int h,int f){
+            this.derecha=derecha;
+            this.izquierda=izquierda;
+            this.arriba=arriba;
+            this.abajo=abajo;
+            this.despliegue=despliegue;
+            this.g=g;
+            this.h=h;
+            this.f=f;
         }
-            
+        public void setdespliegue(boolean despliegue){
+            this.despliegue=despliegue;
+        }
         
-        
-    }
-    
+        public boolean getderecha()
+        {
+            return derecha;
+        }
+        public boolean getizquierda()
+        {
+            return izquierda;
+        }
+        public boolean getarriba()
+        {
+            return arriba;
+        }
+        public boolean getabajo()
+        {
+            return abajo;
+        }
+        public boolean getdespliegue()
+        {
+            return despliegue;
+        }
+        public int getg()
+        {
+            return g;
+        }
+        public int geth()
+        {
+            return h;
+        }
+        public int getf()
+        {
+            return f;
+        }     
+    } 
     
     public static Stack BPL(int nodo[][], int objetivo[][], int profundidad, int i, int j, boolean arriba,boolean abajo,boolean derecha,boolean izquierda,Stack pila){ 
         int aux[][]={{0,0,0},{0,0,0},{0,0,0}};
@@ -2394,7 +1447,13 @@ public class Puzzle {
         System.out.print("se hace el arbol de busqueda en profundidad limitada:");
         Stack pila = new Stack();
         pila.push(A);
-        int [][] Start=A;
+        int [][] start={{0,0,0},{0,0,0},{0,0,0}};
+        for(int Y=0;Y<3;Y++){
+            for(int Z=0;Z<3;Z++){
+                start[Y][Z]=A[Y][Z];
+            }
+        }
+        
         int [][] objetivo = {{1,2,3},{4,5,6},{7,8,0}};
         arriba=false;
         abajo=false;
@@ -2408,42 +1467,1495 @@ public class Puzzle {
                 }
             }
         }
+        MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage beforeHeapMemoryUsage = mbean.getHeapMemoryUsage();
         
-        List<Integer> lista= new ArrayList<Integer>();
-        for(int m=0;m<3;m++){
-            for(int n=0;n<3;n++){
-                lista.add(Start[m][n]);
-            }
-        }
-        int h=o_h(Start);
-        System.out.print(h);
-        int g=0;
-        int f=g+h;
-        //System.out.print(lista);
-        
+        System.out.print("\n");
+        long startTime = System.nanoTime();
         Stack pila2=BPL(A,objetivo,profundidad,i,j,arriba,abajo,derecha,izquierda,pila);
+        long endTime = (long) ((System.nanoTime()-startTime)/1e6);
+        System.out.print("\n");
+        MemoryUsage afterHeapMemoryUsage = mbean.getHeapMemoryUsage();
+        long consumed =  afterHeapMemoryUsage.getUsed() - beforeHeapMemoryUsage.getUsed();
+        
+        ///////////////termina busqueda en profundidad limitada
+        
+        MemoryUsage beforeHeapMemoryUsage2 = mbean.getHeapMemoryUsage();
         
         System.out.print("se hace el arbol de busqueda A*:");
+        for(int a=0;a<3;a++){
+            for(int b=0;b<3;b++){
+                if(start[a][b]==0){
+                    i=a;
+                    j=b;
+                }
+            }
+        }
+        nodo arbol[]=new nodo[15000]; // se hace arbol vacio
+        ArrayList<int[][]> nodos = new ArrayList<>();
+        int modulo[][]={{0,0,0},{0,0,0},{0,0,0}};
+        int h=o_h(start);//calcula la heuristica inicial
+        int f=0+h;
+        int indice=0; //nodo indice
+        nodos.add(start);
+        arbol[indice]=new nodo(false,false,false,false,false,0,h,f);
+        int actual=1; //nodo que actualiza
+        
+        int heuristica=o_h(start);
+        Stack ruta= new Stack();
+        ruta.push(0);
+        
+        long startTime2 = System.nanoTime();
+ 
+        while(heuristica>0){
+            int[][] corrent=nodos.get(indice);
+            for(int I=0;I<3;I++){
+                System.out.print("\n");
+                for(int J=0;J<3;J++){
+                    System.out.print(corrent[I][J]);
+                }
+            }
+            System.out.print("\n");
+            if(i==0 && j==0){
+                if(arbol[indice].getarriba()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    h=o_h(change);
+                    f=g+h;
+                    arbol[actual]=new nodo(true,false,false,false,false,g,h,f); //añado nodo
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getizquierda()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    h=o_h(change);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,h,g+f); //añado nodo
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    h=o_h(change);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,h,g+h);
+                    //////////////////////////////////////////////////////////////
+                    //////////////////////////////////////////////////////////////
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    g=arbol[indice].getg()+1;
+                    h=o_h(ch);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,h,g+h);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        }
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==0 && j==1){
+                
+                if(arbol[indice].getderecha()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    h=o_h(change);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,h,g+h);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    ///////////////////
+                    ///////////////////
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    g=arbol[indice].getg()+1;
+                    h=o_h(ch);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,h,g+h);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getizquierda()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    ///////////////////////////
+                    ////////////////////////
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(ch);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getarriba()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    /////////////////////
+                    ////////////////////
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(ch);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        }
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    nodos.add(change);
+                    ruta.push(actual);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    /////////////////////////
+                    ////////////////////////
+                    int cha[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            cha[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,cha);
+                    ruta.push(actual);
+                    nodos.add(cha);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(cha);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1;
+                    //////////////////
+                    ///////////////////
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(ch);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==0 && j==2){
+                
+                if(arbol[indice].getarriba()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getderecha()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    h=o_h(nodos.get(actual));
+                    int g=arbol[indice].getg()+1;
+                    f=h+g;
+                    arbol[actual]=new nodo(false,true,false,false,false,h,g,f);
+                    actual+=1;
+                    ////////////////////////
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    h=o_h(nodos.get(actual));
+                    g=arbol[indice].getg()+1;
+                    f=h+g;
+                    arbol[actual]=new nodo(false,false,false,true,false,h,g,f);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==1 && j==0){
+                if(arbol[indice].getarriba()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1;
+                    /////////////////////
+                    ////////////////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getizquierda()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    nodos.add(change);
+                    ruta.push(actual);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1;
+                    /////////////
+                    ////////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getabajo()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1;
+                    ////////////////
+                    ////////////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    ////////////////
+                    ////////////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1;
+                    ////////////////////////
+                    ////////////////////////
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(ch);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==1 && j==1){
+                if(arbol[indice].getarriba()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    //////////////
+                    /////////////
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1;
+                    /////////////
+                    ////////////
+                    int cha[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            cha[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,cha);
+                    ruta.push(actual);
+                    nodos.add(cha);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(cha);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getabajo()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    /////////////////
+                    ////////////////
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1;
+                    //////////////////////
+                    /////////////////////
+                    int cha[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            cha[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,cha);
+                    ruta.push(actual);
+                    nodos.add(cha);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(cha);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getderecha()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    ////////////////
+                    /////////////////
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1;
+                    //////////////
+                    //////////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getizquierda()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    //////////////////
+                    /////////////////
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1;
+                    //////////////////////////
+                    ////////////////////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    ///////////////////
+                    ///////////////////
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    ///////////
+                    //////////
+                    actual+=1;
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1;
+                    ////////////
+                    ///////////
+                    int cha[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            cha[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,cha);
+                    ruta.push(actual);
+                    nodos.add(cha);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(cha);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==1 && j==2){
+                
+                if(arbol[indice].getarriba()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    ////////////
+                    ///////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getderecha()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    ////////////
+                    ///////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getabajo()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(nodos.get(actual));
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    //////////////
+                    /////////////
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    
+                    movAb(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(nodos.get(actual));
+                    
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movAb(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==2 && j==0){
+                if(arbol[indice].getizquierda()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,false,true,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getabajo()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(nodos.get(actual));
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int ch[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            ch[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,ch);
+                    ruta.push(actual);
+                    nodos.add(ch);
+                    hh=o_h(ch);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    
+                    indice=actual;
+                    
+                    int min=arbol[actual].getf();
+                   
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==2 && j==1){
+                if(arbol[indice].getabajo()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getderecha()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getizquierda()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    actual+=1;
+                    int chan[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chan[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movD(i,j,chan);
+                    ruta.push(actual);
+                    nodos.add(chan);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chan);
+                    arbol[actual]=new nodo(true,false,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+            }
+            else if(i==2 && j==2){
+                if(arbol[indice].getabajo()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else if(arbol[indice].getderecha()==true){
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        } 
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }
+                else{
+                    int change[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    arbol[indice].setdespliegue(true);
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            change[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movI(i,j,change);
+                    ruta.push(actual);
+                    nodos.add(change);
+                    int g=arbol[indice].getg()+1;
+                    int hh=o_h(change);
+                    arbol[actual]=new nodo(false,true,false,false,false,g,hh,g+hh);
+                    actual+=1; //para agregar otro nodo, sumo 1 al indice actual
+                    int chang[][]={{0,0,0},{0,0,0},{0,0,0}};
+                    for(int I=0;I<3;I++){
+                        for(int J=0;J<3;J++){
+                            chang[I][J]=nodos.get(indice)[I][J]+modulo[I][J];
+                        }
+                    }
+                    movA(i,j,chang);
+                    ruta.push(actual);
+                    nodos.add(chang);
+                    g=arbol[indice].getg()+1;
+                    hh=o_h(chang);
+                    arbol[actual]=new nodo(false,false,true,false,false,g,hh,g+hh);
+                    indice=actual;
+                    int min=arbol[actual].getf();
+                    for(int c=0;c<=actual;c++){
+                        if(arbol[c].getf()<=min && arbol[c].getdespliegue()==false){
+                            min=arbol[c].getf();
+                            indice=c;
+                        }
+                    }
+                    while((int) ruta.peek()>indice){
+                        ruta.pop();
+                    }
+                }  
+            }
+            int[][] current=nodos.get(indice);
+            for(int a=0;a<3;a++){
+                for(int b=0;b<3;b++){
+                    if(current[a][b]==0){
+                        i=a;
+                        j=b;
+                    }
+                }   
+            }
+           actual++;
+           heuristica=o_h(nodos.get(indice));
+           if(heuristica==0){
+                corrent=nodos.get(indice);
+                for(int I=0;I<3;I++){
+                    System.out.print("\n");
+                    for(int J=0;J<3;J++){
+                        System.out.print(corrent[I][J]);
+                    }
+                }
+           }
+        }
+        System.out.print("\n");
+        
+        long endTime2 = (long) ((System.nanoTime()-startTime2)/1e6);
+        MemoryUsage afterHeapMemoryUsage2 = mbean.getHeapMemoryUsage();
+        long consumed2 =  afterHeapMemoryUsage2.getUsed() - beforeHeapMemoryUsage2.getUsed();
+        System.out.print("Tiempo BPL: "+endTime+"ms");
+        System.out.print("\n");
+        System.out.print("Tiempo A*: "+endTime2+"ms");
+        System.out.print("\n");
+        System.out.println("Memoria consumida BPL:" + consumed+" Bytes");
+        System.out.println("Memoria consumida A*:" + consumed2+" Bytes");
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        /*while (!ruta.empty()){
+            int t=(int)ruta.peek();
+            int corrent[][]=nodos.get(t);
+            for(int I=0;I<3;I++){
+                System.out.print("\n");
+                for(int J=0;J<3;J++){
+                System.out.print(corrent[I][J]);
+                }
+            }
+            System.out.print("\n");
+            ruta.pop();
+        }*/
+        //System.out.println(ruta.pop());
         
     }
     
